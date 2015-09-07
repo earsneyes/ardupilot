@@ -49,6 +49,7 @@ bool Plane::verify_land()
         (fabsf(auto_state.sink_rate) < 0.2f && !is_flying())) {
 
         if (!auto_state.land_complete) {
+            auto_state.post_landing_stats = true;
             if (!is_flying() && (millis()-auto_state.last_flying_ms) > 3000) {
                 gcs_send_text_fmt(PSTR("Flare crash detected: speed=%.1f"), (double)gps.ground_speed());
             } else {
@@ -80,6 +81,13 @@ bool Plane::verify_land()
                     get_distance(prev_WP_loc, current_loc) + 200);
     nav_controller->update_waypoint(prev_WP_loc, land_WP_loc);
 
+    // once landed and stationary, post some statistics
+    // this is done before disarm_if_autoland_complete() so that it happens on the next loop after the disarm
+    if (auto_state.post_landing_stats && !arming.is_armed()) {
+        auto_state.post_landing_stats = false;
+        gcs_send_text_fmt(PSTR("Distance from LAND point=%.2fm"), (double)get_distance(current_loc, next_WP_loc));
+    }
+
     // check if we should auto-disarm after a confirmed landing
     disarm_if_autoland_complete();
 
@@ -105,7 +113,7 @@ void Plane::disarm_if_autoland_complete()
         /* we have auto disarm enabled. See if enough time has passed */
         if (millis() - auto_state.last_flying_ms >= g.land_disarm_delay*1000UL) {
             if (disarm_motors()) {
-                gcs_send_text_P(SEVERITY_LOW,PSTR("Auto-Disarmed"));
+                gcs_send_text_P(MAV_SEVERITY_WARNING,PSTR("Auto-Disarmed"));
             }
         }
     }
@@ -203,6 +211,35 @@ void Plane::setup_landing_glide_slope(void)
         constrain_target_altitude_location(loc, prev_WP_loc);
 }
 
+/*
+     Restart a landing by first checking for a DO_LAND_START and
+     jump there. Otherwise decrement waypoint so we would re-start
+     from the top with same glide slope. Return true if successful.
+ */
+void Plane::restart_landing_sequence()
+{
+    if (mission.get_current_nav_cmd().id != MAV_CMD_NAV_LAND) {
+        return;
+    }
+
+
+    uint16_t do_land_start_index = mission.get_landing_sequence_start();
+    uint16_t prev_cmd_with_wp_index = mission.get_prev_nav_cmd_with_wp_index();
+
+    if (do_land_start_index != 0 &&
+        mission.set_current_cmd(do_land_start_index))
+    {
+        // look for a DO_LAND_START and use that index
+        gcs_send_text_fmt(PSTR("Restarted landing via DO_LAND_START: %d"),do_land_start_index);
+    } else if (prev_cmd_with_wp_index != AP_MISSION_CMD_INDEX_NONE &&
+               mission.set_current_cmd(prev_cmd_with_wp_index))
+    {
+        // if a suitable navigation waypoint was just executed, one that contains lat/lng/alt, then
+        // repeat that cmd to restart the landing from the top of approach to repeat intended glide slope
+        gcs_send_text_fmt(PSTR("Restarted landing sequence at waypoint %d"), prev_cmd_with_wp_index);
+    }
+}
+
 /* 
    find the nearest landing sequence starting point (DO_LAND_START) and
    switch to that mission item.  Returns false if no DO_LAND_START
@@ -220,12 +257,12 @@ bool Plane::jump_to_landing_sequence(void)
                 mission.resume();
             }
 
-            gcs_send_text_P(SEVERITY_LOW, PSTR("Landing sequence begun."));
+            gcs_send_text_P(MAV_SEVERITY_WARNING, PSTR("Landing sequence begun."));
             return true;
         }            
     }
 
-    gcs_send_text_P(SEVERITY_HIGH, PSTR("Unable to start landing sequence."));
+    gcs_send_text_P(MAV_SEVERITY_CRITICAL, PSTR("Unable to start landing sequence."));
     return false;
 }
 

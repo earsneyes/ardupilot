@@ -34,7 +34,7 @@ extern "C" {
 // ENUM DEFINITIONS
 
 
-/** @brief Commands to be executed by the MAV. They can be executed on user request, or as part of a mission script. If the action is used in a mission, the parameter mapping to the waypoint/mission message is as follows: Param 1, Param 2, Param 3, Param 4, X: Param 5, Y:Param 6, Z:Param 7. This command list is similar what ARINC 424 is for commercial aircraft: A data format how to interpret waypoint/mission data. */
+/** @brief  */
 #ifndef HAVE_ENUM_MAV_CMD
 #define HAVE_ENUM_MAV_CMD
 typedef enum MAV_CMD
@@ -95,7 +95,7 @@ typedef enum MAV_CMD
 	MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN=246, /* Request the reboot or shutdown of system components. |0: Do nothing for autopilot, 1: Reboot autopilot, 2: Shutdown autopilot.| 0: Do nothing for onboard computer, 1: Reboot onboard computer, 2: Shutdown onboard computer.| Reserved| Reserved| Empty| Empty| Empty|  */
 	MAV_CMD_OVERRIDE_GOTO=252, /* Hold / continue the current action |MAV_GOTO_DO_HOLD: hold MAV_GOTO_DO_CONTINUE: continue with next item in mission plan| MAV_GOTO_HOLD_AT_CURRENT_POSITION: Hold at current position MAV_GOTO_HOLD_AT_SPECIFIED_POSITION: hold at specified position| MAV_FRAME coordinate frame of hold point| Desired yaw angle in degrees| Latitude / X position| Longitude / Y position| Altitude / Z position|  */
 	MAV_CMD_MISSION_START=300, /* start running a mission |first_item: the first mission item to run| last_item:  the last mission item to run (after this item is run, the mission ends)|  */
-	MAV_CMD_COMPONENT_ARM_DISARM=400, /* Arms / Disarms a component |1 to arm, 0 to disarm|  */
+	MAV_CMD_COMPONENT_ARM_DISARM=400, /* Arms / Disarms a component |1 to arm, 0 to disarm| 0 to disarm if landed, 21196 to force disarm any time|  */
 	MAV_CMD_START_RX_PAIR=500, /* Starts receiver pairing |0:Spektrum| 0:Spektrum DSM2, 1:Spektrum DSMX|  */
 	MAV_CMD_REQUEST_AUTOPILOT_CAPABILITIES=520, /* Request autopilot capabilities |1: Request autopilot version| Reserved (all remaining params)|  */
 	MAV_CMD_IMAGE_START_CAPTURE=2000, /* Start image capture sequence |Duration between two consecutive pictures (in seconds)| Number of images to capture total - 0 for unlimited capture| Resolution in megapixels (0.3 for 640x480, 1.3 for 1280x720, etc)|  */
@@ -105,7 +105,7 @@ typedef enum MAV_CMD
 	MAV_CMD_PANORAMA_CREATE=2800, /* Create a panorama at the current position |Viewing angle horizontal of the panorama (in degrees, +- 0.5 the total angle)| Viewing angle vertical of panorama (in degrees)| Speed of the horizontal rotation (in degrees per second)| Speed of the vertical rotation (in degrees per second)|  */
 	MAV_CMD_PAYLOAD_PREPARE_DEPLOY=30001, /* Deploy payload on a Lat / Lon / Alt position. This includes the navigation to reach the required release position and velocity. |Operation mode. 0: prepare single payload deploy (overwriting previous requests), but do not execute it. 1: execute payload deploy immediately (rejecting further deploy commands during execution, but allowing abort). 2: add payload deploy to existing deployment list.| Desired approach vector in degrees compass heading (0..360). A negative value indicates the system can define the approach vector at will.| Desired ground speed at release time. This can be overriden by the airframe in case it needs to meet minimum airspeed. A negative value indicates the system can define the ground speed at will.| Minimum altitude clearance to the release position in meters. A negative value indicates the system can define the clearance at will.| Latitude unscaled for MISSION_ITEM or in 1e7 degrees for MISSION_ITEM_INT| Longitude unscaled for MISSION_ITEM or in 1e7 degrees for MISSION_ITEM_INT| Altitude, in meters AMSL|  */
 	MAV_CMD_PAYLOAD_CONTROL_DEPLOY=30002, /* Control the payload deployment. |Operation mode. 0: Abort deployment, continue normal mission. 1: switch to payload deploment mode. 100: delete first payload deployment request. 101: delete all payload deployment requests.| Reserved| Reserved| Reserved| Reserved| Reserved| Reserved|  */
-	MAV_CMD_DO_START_MAG_CAL=42424, /* Initiate a magnetometer calibration |uint8_t bitmask of magnetometers (0 means all)| Automatically retry on failure (0=no retry, 1=retry).| Save without user input (0=require input, 1=autosave).| Delay (seconds)| Empty| Empty| Empty|  */
+	MAV_CMD_DO_START_MAG_CAL=42424, /* Initiate a magnetometer calibration |uint8_t bitmask of magnetometers (0 means all)| Automatically retry on failure (0=no retry, 1=retry).| Save without user input (0=require input, 1=autosave).| Delay (seconds)| Autoreboot (0=user reboot, 1=autoreboot)| Empty| Empty|  */
 	MAV_CMD_DO_ACCEPT_MAG_CAL=42425, /* Initiate a magnetometer calibration |uint8_t bitmask of magnetometers (0 means all)| Empty| Empty| Empty| Empty| Empty| Empty|  */
 	MAV_CMD_DO_CANCEL_MAG_CAL=42426, /* Cancel a running magnetometer calibration |uint8_t bitmask of magnetometers (0 means all)| Empty| Empty| Empty| Empty| Empty| Empty|  */
 	MAV_CMD_ENUM_END=42427, /*  | */
@@ -351,6 +351,20 @@ typedef enum EKF_STATUS_FLAGS
 #endif
 
 /** @brief  */
+#ifndef HAVE_ENUM_PID_TUNING_AXIS
+#define HAVE_ENUM_PID_TUNING_AXIS
+typedef enum PID_TUNING_AXIS
+{
+	PID_TUNING_ROLL=1, /*  | */
+	PID_TUNING_PITCH=2, /*  | */
+	PID_TUNING_YAW=3, /*  | */
+	PID_TUNING_ACCZ=4, /*  | */
+	PID_TUNING_STEER=5, /*  | */
+	PID_TUNING_AXIS_ENUM_END=6, /*  | */
+} PID_TUNING_AXIS;
+#endif
+
+/** @brief  */
 #ifndef HAVE_ENUM_MAG_CAL_STATUS
 #define HAVE_ENUM_MAG_CAL_STATUS
 typedef enum MAG_CAL_STATUS
@@ -363,20 +377,6 @@ typedef enum MAG_CAL_STATUS
 	MAG_CAL_FAILED=5, /*  | */
 	MAG_CAL_STATUS_ENUM_END=6, /*  | */
 } MAG_CAL_STATUS;
-#endif
-
-/** @brief  */
-#ifndef HAVE_ENUM_PID_TUNING_AXIS
-#define HAVE_ENUM_PID_TUNING_AXIS
-typedef enum PID_TUNING_AXIS
-{
-	PID_TUNING_ROLL=1, /*  | */
-	PID_TUNING_PITCH=2, /*  | */
-	PID_TUNING_YAW=3, /*  | */
-	PID_TUNING_ACCZ=4, /*  | */
-	PID_TUNING_STEER=5, /*  | */
-	PID_TUNING_AXIS_ENUM_END=6, /*  | */
-} PID_TUNING_AXIS;
 #endif
 
 #include "../common/common.h"

@@ -32,17 +32,10 @@ const AP_Param::Info Rover::var_info[] PROGMEM = {
 
     // @Param: INITIAL_MODE
     // @DisplayName: Initial driving mode
-    // @Description: This selects the mode to start in on boot. This is useful for when you want to start in AUTO mode on boot without a receiver. Usuallly used in combination with when AUTO_TRIGGER_PIN or AUTO_KICKSTART.
+    // @Description: This selects the mode to start in on boot. This is useful for when you want to start in AUTO mode on boot without a receiver. Usually used in combination with when AUTO_TRIGGER_PIN or AUTO_KICKSTART.
     // @Values: 0:MANUAL,2:LEARNING,3:STEERING,4:HOLD,10:AUTO,11:RTL,15:GUIDED
     // @User: Advanced
 	GSCALAR(initial_mode,        "INITIAL_MODE",     MANUAL),
-
-    // @Param: RSSI_PIN
-    // @DisplayName: Receiver RSSI sensing pin
-    // @Description: This selects an analog pin for the receiver RSSI voltage. It assumes the voltage is 5V for max rssi, 0V for minimum
-    // @Values: -1:Disabled, 0:APM2 A0, 1:APM2 A1, 2:APM2 A2, 13:APM2 A13, 103:Pixhawk SBUS
-    // @User: Standard
-    GSCALAR(rssi_pin,            "RSSI_PIN",         -1),
 
     // @Param: SYSID_THIS_MAV
     // @DisplayName: MAVLink system ID of this vehicle
@@ -310,7 +303,7 @@ const AP_Param::Info Rover::var_info[] PROGMEM = {
 
     // @Param: FS_THR_VALUE
     // @DisplayName: Throttle Failsafe Value
-    // @Description: The PWM level on channel 3 below which throttle sailsafe triggers.
+    // @Description: The PWM level on channel 3 below which throttle failsafe triggers.
     // @Range: 925 1100
     // @Increment: 1
     // @User: Standard
@@ -518,7 +511,7 @@ const AP_Param::Info Rover::var_info[] PROGMEM = {
     GOBJECT(camera_mount,           "MNT",  AP_Mount),
 #endif
 
-    // @Group: BATT_
+    // @Group: BATT
     // @Path: ../libraries/AP_BattMonitor/AP_BattMonitor.cpp
     GOBJECT(battery,                "BATT", AP_BattMonitor),
 
@@ -540,6 +533,10 @@ const AP_Param::Info Rover::var_info[] PROGMEM = {
     // @Group: MIS_
     // @Path: ../libraries/AP_Mission/AP_Mission.cpp
     GOBJECT(mission, "MIS_",       AP_Mission),
+    
+    // @Group: RSSI_
+    // @Path: ../libraries/AP_RSSI/AP_RSSI.cpp
+    GOBJECT(rssi, "RSSI_",  AP_RSSI),        
 
 	AP_VAREND
 };

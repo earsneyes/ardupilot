@@ -115,8 +115,9 @@ const AP_Param::GroupInfo AP_GPS::var_info[] PROGMEM = {
 
     // @Param: GNSS_MODE
     // @DisplayName: GNSS system configuration
-    // @Description: Bitmask for what GNSS system to use
-    // @Values: 0: Leave as currently configured 1: GPS 2: SBAS 4: Galileo 8: Beidou 16: IMES 32: QZSS 64: GLONASS
+    // @Description: Bitmask for what GNSS system to use (all unchecked or zero to leave GPS as configured)
+    // @Values: 0:Leave as currently configured 1:GPS 2:SBAS 4:Galileo 8:Beidou 16:IMES 32:QZSS 64:GLONASS
+    // @Bitmask: 0:GPS, 1:SBAS, 2:Galileo, 3:Beidou, 4:IMES, 5:QZSS, 6:GLOSNASS
     // @User: Advanced
     // @RebootRequired: True
     AP_GROUPINFO("GNSS_MODE", 10, AP_GPS, _gnss_mode, 0),
@@ -144,7 +145,7 @@ const uint32_t AP_GPS::_baudrates[] PROGMEM = {4800U, 38400U, 115200U, 57600U, 9
 
 // initialisation blobs to send to the GPS to try to get it into the
 // right mode
-const prog_char AP_GPS::_initialisation_blob[] PROGMEM = UBLOX_SET_BINARY MTK_SET_BINARY SIRF_SET_BINARY;
+const prog_char AP_GPS::_initialisation_blob[] PROGMEM = UBLOX_SET_BINARY MTK_SET_BINARY SIRF_SET_BINARY ;
 const prog_char AP_GPS::_initialisation_raw_blob[] PROGMEM = UBLOX_SET_BINARY_RAW_BAUD MTK_SET_BINARY SIRF_SET_BINARY;
 
 /*
@@ -214,6 +215,14 @@ AP_GPS::detect_instance(uint8_t instance)
     state[instance].status = NO_GPS;
     state[instance].hdop = 9999;
 
+	#if GPS_RTK_AVAILABLE
+	// by default the sbf gps outputs no data on its port, until configured.
+	if (_type[instance] == GPS_TYPE_SBF) {
+		hal.console->print_P(PSTR(" SBF "));
+		new_gps = new AP_GPS_SBF(*this, state[instance], _port[instance]);
+	}
+	#endif // GPS_RTK_AVAILABLE
+	
     // record the time when we started detection. This is used to try
     // to avoid initialising a uBlox as a NMEA GPS
     if (dstate->detect_started_ms == 0) {
@@ -454,7 +463,7 @@ AP_GPS::setHIL(uint8_t instance, GPS_Status _status, uint64_t time_epoch_ms,
     istate.location.options = 0;
     istate.velocity = _velocity;
     istate.ground_speed = pythagorous2(istate.velocity.x, istate.velocity.y);
-    istate.ground_course_cd = degrees(atan2f(istate.velocity.y, istate.velocity.x)) * 100UL;
+    istate.ground_course_cd = wrap_360_cd(degrees(atan2f(istate.velocity.y, istate.velocity.x)) * 100UL);
     istate.hdop = hdop;
     istate.num_sats = _num_sats;
     istate.have_vertical_velocity |= _have_vertical_velocity;

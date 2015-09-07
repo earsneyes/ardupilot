@@ -26,7 +26,7 @@
 #include <GCS_MAVLink/GCS_MAVLink.h>
 #include <AP_Vehicle/AP_Vehicle.h>
 #include "GPS_detect_state.h"
-#include "../AP_SerialManager/AP_SerialManager.h"
+#include <AP_SerialManager/AP_SerialManager.h>
 
 /**
    maximum number of GPS instances available on this platform. If more
@@ -88,7 +88,8 @@ public:
         GPS_TYPE_SIRF  = 6,
         GPS_TYPE_HIL   = 7,
         GPS_TYPE_SBP   = 8,
-        GPS_TYPE_PX4   = 9
+        GPS_TYPE_PX4   = 9,
+        GPS_TYPE_SBF   = 10,
     };
 
     /// GPS status codes
@@ -424,5 +425,6 @@ private:
 #include "AP_GPS_SIRF.h"
 #include "AP_GPS_SBP.h"
 #include "AP_GPS_PX4.h"
+#include "AP_GPS_SBF.h"
 
 #endif // __AP_GPS_H__

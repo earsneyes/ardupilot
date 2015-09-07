@@ -143,6 +143,24 @@
                     <description>Onboard gimbal</description>
                </entry>
           </enum>
+          <enum name="FIRMWARE_VERSION_TYPE">
+              <description>These values define the type of firmware release.  These values indicate the first version or release of this type.  For example the first alpha release would be 64, the second would be 65.</description>
+              <entry value="0" name="FIRMWARE_VERSION_TYPE_DEV">
+                  <description>development release</description>
+              </entry>
+              <entry value="64" name="FIRMWARE_VERSION_TYPE_ALPHA">
+                  <description>alpha release</description>
+              </entry>
+              <entry value="128" name="FIRMWARE_VERSION_TYPE_BETA">
+                  <description>beta release</description>
+              </entry>
+              <entry value="192" name="FIRMWARE_VERSION_TYPE_RC">
+                  <description>release candidate</description>
+              </entry>
+              <entry value="255" name="FIRMWARE_VERSION_TYPE_OFFICIAL">
+                  <description>official stable release</description>
+              </entry>
+          </enum>
           <!-- WARNING: MAV_ACTION Enum is no longer supported - has been removed. Please use MAV_CMD -->
           <enum name="MAV_MODE_FLAG">
                 <description>These flags encode the MAV mode.</description>
@@ -1448,8 +1466,8 @@
               <entry value="1024" name="MAV_PROTOCOL_CAPABILITY_SET_ACTUATOR_TARGET">
                   <description>Autopilot supports direct actuator control.</description>
               </entry>
-              <entry value="2048" name="MAV_PROTOCOL_CAPABILITY_FORCE_DISARM">
-                  <description>Autopilot supports forced disarming.</description>
+              <entry value="2048" name="MAV_PROTOCOL_CAPABILITY_FLIGHT_TERMINATION">
+                  <description>Autopilot supports the flight termination command.</description>
               </entry>
               <entry value="4096" name="MAV_PROTOCOL_CAPABILITY_COMPASS_CALIBRATION">
                   <description>Autopilot supports onboard compass calibration.</description>
