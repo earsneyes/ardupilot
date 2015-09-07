@@ -16,7 +16,7 @@
     -- Coded by Victor Mayoral Vilches --
 */
 
-#include <AP_HAL/AP_HAL.h>
+#include <AP_HAL.h>
 #if CONFIG_HAL_BOARD == HAL_BOARD_LINUX
 
 #include "AP_InertialSensor_MPU9250.h"
@@ -187,7 +187,7 @@ AP_InertialSensor_MPU9250::AP_InertialSensor_MPU9250(AP_InertialSensor &imu) :
     /* no rotation needed */
     _default_rotation(ROTATION_NONE)
 #elif CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_LINUX_BBBMINI
-    _default_rotation(ROTATION_NONE)
+    _default_rotation(ROTATION_YAW_270)
 #else /* rotate for bbone default (and other boards) */
     _default_rotation(ROTATION_ROLL_180_YAW_90)
 #endif
