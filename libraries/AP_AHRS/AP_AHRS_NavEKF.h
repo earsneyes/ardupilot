@@ -24,7 +24,7 @@
 #include <AP_HAL/AP_HAL.h>
 #include "AP_AHRS.h"
 
-#if HAL_CPU_CLASS >= HAL_CPU_CLASS_150
+#if HAL_CPU_CLASS >= HAL_CPU_CLASS_75
 #include <AP_NavEKF/AP_NavEKF.h>
 
 #define AP_AHRS_NAVEKF_AVAILABLE 1

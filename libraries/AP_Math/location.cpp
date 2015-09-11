@@ -35,7 +35,7 @@
 
 float longitude_scale(const struct Location &loc)
 {
-#if HAL_CPU_CLASS < HAL_CPU_CLASS_150
+#if HAL_CPU_CLASS < HAL_CPU_CLASS_75
     static int32_t last_lat;
     static float scale = 1.0;
     // don't optimise on faster CPUs. It causes some minor errors on Replay
